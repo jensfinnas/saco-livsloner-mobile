@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.area-above {
+  fill: rgb(252,141,89);
+  stroke: #00F;
+  stroke-width: 1.5px;
+}
+
+.area-below {
+  fill: rgb(145,207,96);
+  stroke: #00F;
+  stroke-width: 1.5px;
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.line2 {
+  fill: none;
+  stroke: #F00;
+  stroke-width: 1.5px;
+}
+
+input[type="checkbox"] {
+	margin-right: 5px;
+}
+
+.jumbotron .form-group {
+	line-height: 1em !important;
+	color: #444;
+	font-size: 0.7em;
+}
+
+</style>
+<body>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>Välj vad som ska visas!</h1>
+
+	<p>
+	Visa scenario-delen ovanför grafen:<br>
+	<label><input type="radio" name="showslider" value="showslider=0&"  checked="checked"> Nej</input></label>
+	<label><input type="radio" name="showslider" value=""> Ja</input></label>
+	</p>
+	<p>
+	Visa filtreringsknapparna under grafen:<br>
+	<label><input type="radio" name="showfilter" value="showfilter=0&"  checked="checked"> Nej</input></label>
+	<label><input type="radio" name="showfilter" value=""> Ja</input></label>
+	</p>
+	<p>
+	Kurva som ska vara uppritad:</p>
+	<div class="form-group">
+		<div id="filter_option">
+			<div style="float:left; width: 50%;">
+				<input type="checkbox" name="filter" value="amneslarare">Högstadie & Gymnasielärare</input><br>
+				<input type="checkbox" name="filter" value="lagmellanstdlr">Låg & Mellanstadielärare</input><br>
+				<input type="checkbox" name="filter" value='lararePrakEstet'>Lärare i praktiskt-estetiskt ämne</input><br>
+				<input type="checkbox" name="filter" value='yrkeslarare'>Yrkeslärare</input><br>
+				<input type="checkbox" name="filter" value='Humanist'>Humanist</input><br>
+				<input type="checkbox" name="filter" value='Konstutb'>Konstvetenskap</input><br>
+				<input type="checkbox" name="filter" value='Teolog'>Teolog</input><br>
+				<input type="checkbox" name="filter" value='Biblinfo'>Biblioteks- och informationsvetenskap</input><br>
+				<input type="checkbox" name="filter" value='Ekonom'>Ekonom</input><br>
+				<input type="checkbox" name="filter" value='Org_adm'>Organisation, administration & förvaltning</input><br>
+				<input type="checkbox" name="filter" value='Jurist'>Jurist</input><br>
+				<input type="checkbox" name="filter" value='Journalist'>Journalist</input><br>
+				<input type="checkbox" name="filter" value='Psykolog'>Psykolog</input><br>
+				<input type="checkbox" name="filter" value='Samhbetvet'>Samhälls-/Beteendevetare</input><br>
+				<input type="checkbox" name="filter" value='Arkitekt'>Arkitekt</input><br>
+				<input type="checkbox" name="filter" value='Civ_ing'>Civilingenjör</input><br>
+				<input type="checkbox" name="filter" value='Hgsk_ing'>Högskoleingenjör</input><br>
+				<input type="checkbox" name="filter" value='Agronom'>Agronom</input><br>
+				<input type="checkbox" name="filter" value='Veterinar'>Veterinär</input><br>	
+			</div>
+			<div style="float:left; width: 50%;">
+				<input type="checkbox" name="filter" value='Apotekare'>Apotekare</input><br>
+				<input type="checkbox" name="filter" value='Arbterap'>Arbetsterapeut</input><br>
+				<input type="checkbox" name="filter" value='Biomed_analyt'>Biomedecinsk analytiker</input><br>
+				<input type="checkbox" name="filter" value='Lakare'>Läkare</input><br>
+				<input type="checkbox" name="filter" value='Receptarie'>Receptarie</input><br>
+				<input type="checkbox" name="filter" value='Sjukgymn'>Sjukgymnast</input><br>
+				<input type="checkbox" name="filter" value='Sjukskoterska'>Sjuksköterska</input><br>
+				<input type="checkbox" name="filter" value='Soc_omsorg'>Social omsorgsutbildning</input><br>
+				<input type="checkbox" name="filter" value='Socionom'>Socionom</input><br>
+				<input type="checkbox" name="filter" value='Tandhyg'>Tandhygienist</input><br>
+				<input type="checkbox" name="filter" value='Tandlakare'>Tandläkare</input><br>
+				<input type="checkbox" name="filter" value='Systvet'>Systemvetare</input><br>
+				<input type="checkbox" name="filter" value='Geovet'>Geovetare</input><br>
+				<input type="checkbox" name="filter" value='Kemist'>Kemist</input><br>
+				<input type="checkbox" name="filter" value='Matstat'>Matematiker & Statistiker</input><br>
+				<input type="checkbox" name="filter" value='Datavet'>Datavetare</input><br>
+				<input type="checkbox" name="filter" value='Biolog'>Biolog</input><br>
+				<input type="checkbox" name="filter" value='Akademiker_totalt'>Akademiker, totalt</input><br>
+			</div>
+		</div>
+	</div>
+  </div>
+</div>
+
+<div style="clear:both;" ></div>
+
+<div style="width: 90%; margin: 30px auto;">
+
+	<div class="row">
+	<div id="forhandsvisning" style="background-color: #ddd; padding: 15px; display: none; margin: 10px 0; ">
+		<h3>Förhandsvisning:</h3>
+		<div id="previewiFrame"></div>
+	</div>
+	</div>
+
+	<div class="row">
+	<div id="iframeTextDiv"></div>
+	</div>
+
+
+
+	<div class="row">
+		<div class="input-group col-md-2">
+		  <span class="input-group-addon"><span class="glyphicon glyphicon-resize-horizontal"></span></span>
+		  <input type="text" id="bredd" class="form-control" placeholder="Bredd i pixlar">
+		</div>
+
+		<div class="input-group col-md-2">
+		  <span class="input-group-addon"><span class="glyphicon glyphicon-resize-vertical"></span></span>
+		  <input type="text" id="hojd" class="form-control" placeholder="Höjd i pixlar">
+		</div>
+
+		<a id="iframeText" href="#" type="button" class="btn btn-warning">Generera kod att bädda in med</a> <span style="font-size: 15px; margin: 0px 20px;"><b>   eller   </b></span>
+		<a id="filter" href="" type="button" class="btn btn-primary">Ta fram graf</a>  
+	</div>
+
+</div>
+
+
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+<script>
+
+$("input:radio").change(function() {
+	updateHref();
+})
+
+$(":checkbox").change(function() {
+	updateHref();
+})
+
+
+
+function updateHref() {
+	var showslider = $('input:radio[name=showslider]:checked').val();
+	var showfilter = $('input:radio[name=showfilter]:checked').val();
+	var filter = "";
+
+    $(':checkbox:checked').each(function(i){
+          filter += $(this).val() + "+";
+    });
+
+    if(filter.length>0) { filter = "filter=" + filter; }
+
+	var action = showslider + showfilter + filter;
+
+	if(showslider=="") {
+		console.log("run");
+		//$('#filter_option').val("").prop("selected",true);
+		$('.form-group:not(:has(fieldset))').find("#filter_option").wrapAll("<fieldset disabled>");
+	} else if(showslider=="showslider=0&") {
+		$( ".form-group" ).has( "fieldset" ).find("#filter_option").unwrap();
+	}
+
+	$("#filter").attr("href", "http://alexanderdangler.com/SACO/index.html?" + action);
+}
+
+$('#iframeText').on("click",function(){
+	var showslider = $('input:radio[name=showslider]:checked').val();
+	var showfilter = $('input:radio[name=showfilter]:checked').val();
+	var filter = "";
+	var hojd = $('#hojd').val();
+	var bredd = $('#bredd').val();
+
+    $(':checkbox:checked').each(function(i){
+          filter += $(this).val() + "+";
+    });
+
+    if(filter.length>0) { filter = "filter=" + filter; }
+
+	var action = showslider + showfilter + filter;
+
+	console.log("action");
+
+	$("#iframeTextDiv").text("<iframe src='http://alexanderdangler.com/SACO/index.html?" + action + "'' width='"+bredd+"px' height='"+hojd+"px' frameborder='0' scrolling='no' seamless></iframe>").slideDown();
+	$("#iframeTextDiv").addClass("alert alert-info col-md-8").css("font-size", "20px");
+
+	$("#previewiFrame").html("<iframe src='index.html?" + action + "'' width='"+bredd+"px' height='"+hojd+"px' frameborder='0' scrolling='no' seamless></iframe>");
+	$("#forhandsvisning").css("display","block").slideDown();
+	
+
+	event.preventDefault();
+	event.stopPropagation();
+
+})
+
+updateHref();
+
+</script>
