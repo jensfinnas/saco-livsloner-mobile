@@ -1,0 +1,131 @@
+#chart {
+  width: 100%;
+}
+
+/* GRAPH */
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #ccc;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  /*display: none;*/
+}
+.axis .caption {
+  fill: #3D3D3D;
+  font-weight: bold;
+}
+.tick line {
+  opacity: 0.45;
+}
+.tick text {
+  font-size: 0.8em;
+  fill: #3D3D3D;
+}
+
+.tick:nth-of-type(1) text {
+  display: none;
+}
+
+.area-above {
+    fill: rgb(252,141,89);
+  opacity: .5;
+    vector-effect: non-scaling-stroke;
+}
+
+.area-below {
+    fill: rgb(145,207,96);
+  opacity: .5;
+    vector-effect: non-scaling-stroke;
+}
+.line_group {
+  cursor: default;
+}
+.line {
+    fill: none;
+    stroke: #000;
+    vector-effect: non-scaling-stroke;
+}
+.profession-line {
+  .line {
+    stroke: $theme-color;
+    stroke-width: 2px;
+  }
+  .color-key {
+    fill: $theme-color;
+  }
+}
+
+$baseline-color: $color-grey;
+.baseline {
+  .line {
+    fill: none;
+    stroke: $baseline-color;
+    stroke-width: 1px;
+    z-index: 999;
+  }
+  .color-key {
+    fill: $baseline-color;
+  }
+}
+
+
+// ANNOTATION
+
+// Break even point
+.break-even {
+  circle {
+    fill: #fff;
+    stroke: $theme-color;
+  }
+}
+
+
+// The highlighted difference between baseline and profession
+.difference {
+  text {
+    text-anchor: middle;
+  }
+  line {
+    stroke-width: 1;
+    stroke-dasharray: 4, 2;
+  }
+}
+.difference.plus {
+  line {
+    stroke: rgb(25, 167, 25);
+  }
+}
+.difference.minus {
+  line {
+    stroke: red;
+  }
+}
+
+#legend {
+  position: relative;
+  top: 30px;
+  left: 120px;
+}
+
+.sentence {
+  padding: 10px;
+  background: #f1f1f1;
+  border-radius: 6px;
+  display: block;
+}
+
+// Handle inactive state (no selection)
+.overlay {
+  opacity: 0;
+}
+.no-selection {
+  .overlay {
+    opacity: 0.7;
+  }
+  .sentence {
+    display: none;
+  }
+}
