@@ -3,6 +3,8 @@
 }
 
 /* GRAPH */
+
+// AXES
 .axis path,
 .axis line {
   fill: none;
@@ -17,31 +19,17 @@
   fill: #3D3D3D;
   font-weight: bold;
 }
-.tick line {
-  opacity: 0.45;
-}
-.tick text {
-  font-size: 0.8em;
-  fill: #3D3D3D;
+@media screen and (min-width: $break-point) {
+  .axis .caption {
+    font-size: 16px;
+  }
 }
 
-.tick:nth-of-type(1) text {
-  display: none;
-}
-
-.area-above {
-    fill: rgb(252,141,89);
-  opacity: .5;
-    vector-effect: non-scaling-stroke;
-}
-
-.area-below {
-    fill: rgb(145,207,96);
-  opacity: .5;
-    vector-effect: non-scaling-stroke;
-}
-.line_group {
-  cursor: default;
+// Lines
+.line-group.faded {
+  path, text {
+    opacity: .2;
+  }
 }
 .line {
     fill: none;
@@ -58,7 +46,7 @@
   }
 }
 
-$baseline-color: $color-grey;
+$baseline-color: $color-dark-grey;
 .baseline {
   .line {
     fill: none;
@@ -79,6 +67,11 @@ $baseline-color: $color-grey;
   circle {
     fill: #fff;
     stroke: $theme-color;
+  }
+}
+@media screen and (min-width: $break-point) {
+  .break-even {
+    font-size: 20px;
   }
 }
 
@@ -117,15 +110,26 @@ $baseline-color: $color-grey;
   display: block;
 }
 
+// Sidebar labels (desktop)
+.label-group {
+  line {
+    stroke-dasharray: 2,2;
+  }
+}
+
 // Handle inactive state (no selection)
 .overlay {
   opacity: 0;
+  display: none;
 }
 .no-selection {
   .overlay {
     opacity: 0.7;
+    display: block;
   }
   .sentence {
     display: none;
   }
 }
+
+

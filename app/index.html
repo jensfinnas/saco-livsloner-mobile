@@ -34,22 +34,20 @@
     </script>
     <script id="navigation-desktop" type="text/x-handlebars-template">
     {{#each .}}
-    <div class="filter-column">
+    <div class="column">
       {{#each .}}
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
-              <a href="#group-{{ slugify nameShort }}" data-target="#group-{{ slugify nameShort }}" data-toggle="collapse" class="accordion-toggle">
-                <span class="glyphicon glyphicon-chevron-up pull-right"></span>
+              <span class="glyphicon glyphicon-plus pull-right"></span>
                 {{ nameShort }}
-              </a>
             </h4>
           </div>
           <div class="panel-collapse in" id="group-{{ slugify nameShort }}">
             <div class="panel-body">
               {{#each items}}
               <label>
-                <input type="checkbox" value="{{ column }}|{{baseline}}" class="profession"/> {{ label }}
+                <input type="checkbox" value="{{ label }}|{{ column }}|{{baseline}}" class="profession"/> {{ label }}
               </label>
               {{/each}}
             </div>
@@ -101,7 +99,7 @@
     // App settings
     var app = {};
     app.selector = '#chart';
-    app.mobile = true;
+    app.mobile = false;
     app.dataPath = 'data/data2015.tsv';
     </script>
 

@@ -13,7 +13,7 @@ Livsloner = (function() {
 		self.sentenceContainer = self.container.append("div")
 			.attr('class', 'sentence');
 
-		var desktopMargins = {top: 0, right: 200, bottom: 30, left: 70};
+		var desktopMargins = {top: 10, right: 200, bottom: 30, left: 70};
 		var mobileMargins = {top: 10, right: 40, bottom: 30, left: 27};
 
 		self.margin = m = mobile ? mobileMargins : desktopMargins;
@@ -37,17 +37,24 @@ Livsloner = (function() {
 		else {
 			self.navigationContainer = self.container
 				.append("div")
-				.attr('class', 'navigation');
+				.attr('class', 'navigation ' + (self.mobile ? 'mobile' : 'desktop'));
 			var templateElement = d3.select("#navigation-desktop");
 		}
 		var source   = templateElement.html();
 		var template = Handlebars.compile(source);
 
 		self.navigationContainer.html( template( self.groups ) );
-		self.navigationContainer.selectAll('.profession')
-			.on("change", function() {
-				self.update();
-			});
+		self.navigationContainer.selectAll('.profession').on("change", function() {
+			self.update();
+		});
+		/* 	In desktop check all professions when a group heading is clicked. 
+			And uncheck the others.
+		*/
+		self.navigationContainer.selectAll('.panel-heading').on('click', function() {
+			d3.selectAll('.profession').property('checked', false);
+			d3.select(this.parentElement).selectAll('.profession').property('checked', true);
+			self.update();
+		})
 	};
 
 	// Draw base svg
@@ -137,7 +144,7 @@ Livsloner = (function() {
 	Livsloner.prototype.drawBaseline = function() {
 		var self = this;
 	};
-	Livsloner.prototype.addLines = function(callbacks) {
+	Livsloner.prototype.updateLines = function(callbacks) {
 		var self = this;
 		var lineGroup = self.lineGroups.enter()
 			.append('g')
@@ -150,9 +157,32 @@ Livsloner = (function() {
 			.attr("class", "line")
 			.attr("d", self.line);
 
+		var hoverPath = lineGroup.append("path")
+			.datum(function(d) { return d.values })
+			.attr("d", self.line)
+			.attr('stroke-width', 10)
+			.attr('stroke', '#fff')
+			.attr('opacity', 0.0001)
+			.attr('fill', 'none')
+			.on('mouseover', function() {
+				var hoveredLineGroup = this.parentElement;
+				self.lineGroups.classed('faded', function() {
+					return this !== hoveredLineGroup;
+				})
+			})
+			.on('mouseout', function() {
+				self.lineGroups.classed('faded', false);
+			});
+
 		// Animate entering lines
 		var animationDuration = 300;
-		var totalLength = path[0][1].getTotalLength();
+
+		var totalLength;
+		path[0].forEach(function(node) {
+			if (node) {
+				totalLength = Math.max(node.getTotalLength(), totalLength);
+			}
+		});
 		var numberOfExistingLines = lineGroup[0].filter(function(d) {
 			return d === null;
 		}).length;
@@ -167,6 +197,12 @@ Livsloner = (function() {
 			.attr("stroke-dashoffset", 0)
 			// Add break even after animation
 			.call(transitionEnd, function() { run(callbacks) });
+		
+		// Remove unselected professions
+		self.lineGroups.exit().transition()
+			.remove()
+			.call(transitionEnd, function() { run(callbacks) });
+
 	};
 	
 
@@ -273,17 +309,9 @@ Livsloner = (function() {
 				return 'translate('+[x,y]+')';
 			});
 		g.append("text").each(function (d) {
-		    var arr = addLineBreaks(d.label, 15).split("\n");
-		    if (arr != undefined) {
-		        for (i = 0; i < arr.length; i++) {
-		            d3.select(this).append("tspan")
-		                .text(arr[i])
-		                .attr("dy", i ? "1.2em" : 0)
-		                .attr("x", 0)
-		                .attr("class", "tspan" + i);
-		        	}
-		    	}
-			});
+			var label = addLineBreaks(d.label, 15);
+			addLineBreaksToSVG(str, this);
+		});
 
 		var colorKeySize = 6;
 		g.append("rect")
@@ -294,7 +322,7 @@ Livsloner = (function() {
 			.attr('height', colorKeySize);
 	}
 
-	/*Livsloner.prototype.addHighlightedArea = function(args) {
+	Livsloner.prototype.updateDesktopLabels = function(args) {
 		var self;
 		if (args.self) {
 			self = args.self;
@@ -302,13 +330,77 @@ Livsloner = (function() {
 		else {
 			self = this;
 		}
-		http://stackoverflow.com/questions/25901271/using-d3-to-shade-area-between-two-lines
-		
-	};*/
-	Livsloner.prototype.removeLines = function() {
+
+		/*	We use a force layout to dynamically place labels and (almost) prevent overlap.
+
+		*/
+		var foci = [],
+          labels = [];
+
+        self.lineGroups.transition().each(function(d, i) {
+        	var x = self.width;
+        	var y = self.y(d.finalSalary);
+        	foci.push({x: x, y: y });
+        	labels.push({x: x, y: y, x0: x, y0: y, label: d.label})
+        });
+
+        var labelGroups = self.chart.selectAll('.label-group')
+          .data(labels, function(d) { return d.label; });
+
+        var newLabelGroups = labelGroups.enter().append('g')
+			.attr('class', 'label-group')
+			.attr('transform', function(d) {
+				return 'translate('+[d.x, d.y]+')'
+			});
+
+		newLabelGroups.append('text')
+			.each(function(d) {
+				var str = addLineBreaks(d.label, 15);
+				addLineBreaksToSVG(str, this)					
+			})
+			.attr('transform', 'translate(19,0)');
+
+		newLabelGroups.append('line')
+			.attr('x1', 4)
+			.attr('x2', 15)
+			.attr('y1', 0)
+			.attr('y2', 0)
+			.attr('stroke','#333')
+
+		var force = d3.layout.force()
+		    .nodes(labels)
+		    .charge(-20)
+		    .gravity(0)
+		    .size([self.width, self.height]);
+
+		force.on("tick", function(e) {
+		    var k = .1 * e.alpha;
+		    labels.forEach(function(o, j) {
+		        // The change in the position is proportional to the distance
+		        // between the label and the corresponding place (foci)
+		        o.y += (foci[j].y - o.y) * k;
+		        o.x += (foci[j].x - o.x) * k;
+		    });
+		    // Update the position of the text element
+		    self.chart.selectAll(".label-group")
+		    	.attr('transform', function(d) {
+		    		return 'translate('+[d.x, d.y]+')';
+		    	});
+
+		    self.chart.selectAll(".label-group line")
+		    	.attr('y1', function(d) {
+		    		return d.y0 - d.y;
+		    	});
+		});
+		force.start();
+
+		labelGroups.exit().remove();
+	};
+
+	/*Livsloner.prototype.removeLines = function() {
 		var self = this;
 		self.lineGroups.exit().remove();
-	};
+	};*/
 	Livsloner.prototype.removeAnnotation = function() {
 		var self = this;
 		self.chart.selectAll('.annotation').remove();
@@ -338,11 +430,16 @@ Livsloner = (function() {
 			.data(lineData, function(d) { return d.column; });
 
 		// Remove exiting lines
-		self.removeLines();
 		self.removeAnnotation();
 
 		// Add break even after lines are drawn if there is only one line (+ baseline)
 		var callbacks = [];
+		if (!self.mobile) {
+			callbacks.push({
+				fn: self.updateDesktopLabels,
+				args: { self: self }
+			})
+		}
 		if (lineData.length == 2) {
 			self.breakEven = getBreakEvenPoint(lineData);
 			self.finalSalaries = getFinalSalaries(lineData);
@@ -350,16 +447,24 @@ Livsloner = (function() {
 			callbacks.push({ 
 				fn: self.addBreakEven,
 				args: { self: self }
-			}, {
-				fn: self.annotateDifference,
-				args: { self: self }
-			}, {
-				fn: self.annotateLines,
-				args: { self: self }
-			}, {
+			}, 
+			{
 				fn: self.addSentence,
 				args: { self: self }
 			});
+
+			// Highligt the final salary diff in mobile
+			if (self.mobile) {
+				callbacks.push({
+					fn: self.annotateDifference,
+					args: { self: self }
+				},
+				{
+					fn: self.annotateLines,
+					args: { self: self }
+				});	
+			}
+			
 
 
 			/* 	Show break even also if we move from multiple selected to two.
@@ -373,7 +478,7 @@ Livsloner = (function() {
 		}
 
 		// Draw lines
-		self.addLines(callbacks);
+		self.updateLines(callbacks);
 
 
 	};
@@ -406,6 +511,7 @@ Livsloner = (function() {
 			return {
 				column: profession.column,
 				label: profession.label,
+				finalSalary: data[data.length - 1][profession.column],
 				values: data.map(function(d) {
 					return {
 						age: d.alder,
@@ -465,9 +571,8 @@ Livsloner = (function() {
 
 	// Get the final salaries of baseline and profession in compare mode
 	var getFinalSalaries = function(lineData) {
-		var lastIndex = lineData[0].values.length - 1;
-		var baseline = lineData[0].values[lastIndex].salary;
-		var profession = lineData[1].values[lastIndex].salary;
+		var baseline = lineData[0].finalSalary;
+		var profession = lineData[1].finalSalary;
 		return {
 			baseline: baseline,
 			profession: profession,
@@ -498,6 +603,18 @@ Livsloner = (function() {
 	 		newStr += (d + delimiter)
 	 	})
 	 	return newStr;
+	 }
+	 var addLineBreaksToSVG = function(str, elem) {
+	 	var arr = str.split("\n");
+	 	if (arr != undefined) {
+	 	    for (i = 0; i < arr.length; i++) {
+	 	        d3.select(elem).append("tspan")
+	 	            .text(arr[i])
+	 	            .attr("dy", i ? "1.2em" : 0)
+	 	            .attr("x", 0)
+	 	            .attr("class", "tspan" + i);
+	 	    }
+	 	}
 	 }
 
 	 var run = function(callbacks) {

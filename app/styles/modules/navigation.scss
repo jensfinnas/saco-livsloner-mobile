@@ -1,0 +1,26 @@
+
+// Desktop navigation
+.navigation.desktop {
+	.column {
+		width: 18%;
+		display: inline-block;
+		margin: .6%;
+		float: left;
+	}
+	.panel {
+		background: $saco-grey;
+		border-radius: 6px;
+		box-shadow: 0;
+		border: 0;
+		
+		.panel-heading {
+			background-color: $saco-orange;
+			border: 0;
+			cursor: pointer;
+		}
+		label {
+			font-weight: 300;
+			display: block;
+		}
+	}
+}
