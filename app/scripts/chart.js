@@ -272,7 +272,9 @@ Livsloner = (function() {
 		else {
 			self = this;
 		};
-		var sentence = getSentence(self.breakEven, self.finalSalaries);
+
+		var baselineLabel = self.chart.select('.baseline.line-group')[0][0].__data__.label.toLowerCase();
+		var sentence = getSentence(self.breakEven, self.finalSalaries, baselineLabel);
 		self.sentenceContainer.html(sentence).classed('hidden', false);
 	}
 	Livsloner.prototype.annotateDifference = function(args) {
@@ -568,18 +570,25 @@ Livsloner = (function() {
 		return false;
 	}
 
-	var getSentence = function(breakEven, finalSalaries) {
+	var getSentence = function(breakEven, finalSalaries,baselineLabel) {
 		var str = '';
 		var comparator;
-		if (breakEven) {
-			str = 'Vid ' + breakEven.age + ' år har du tjänat lika mycket som en gymnasieutbildad.';
-			comparator = 'mer';
+		var isBaseline = finalSalaries.baseline == finalSalaries.profession;
+		if (isBaseline) {
+			str += 'En '+baselineLabel+'s livslön landar på ' + formatInSentence(finalSalaries.profession) + '.';
 		}
 		else {
-			str += 'Du kommer aldrig i kapp en gymnasieutbildad i livslön.';
-			comparator = 'mindre';
+			if (breakEven) {
+				str = 'Vid ' + breakEven.age + ' år har du tjänat lika mycket som en ' + baselineLabel + '.';
+				comparator = 'mer';
+			}
+			else {
+				str += 'Du kommer aldrig i kapp en ' + baselineLabel + ' i livslön.';
+				comparator = 'mindre';
+			}
+			str +=  ' Din livslön är ' + formatInSentence(finalSalaries.profession) + ', ' + formatInSentence(Math.abs(finalSalaries.difference)) + ' ' + comparator + ' än den gymnasieutbildades.';
 		}
-		str +=  ' Din livslön är ' + formatInSentence(finalSalaries.profession) + ', ' + formatInSentence(Math.abs(finalSalaries.difference)) + ' ' + comparator + ' än en gymnasieutbildads.';
+		
 		return str;
 
 	}

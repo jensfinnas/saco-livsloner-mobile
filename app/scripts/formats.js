@@ -18,7 +18,7 @@ var formatMillionSEK = function(d) {
 		.replace('M', ' Mkr'); 
 }
 var formatInSentence = function(d) {
-	return d3.format(".2s")(d)
+	return d3.format(".3s")(d)
 		.replace('k', '&nbsp;000 kronor')
 		.replace('M', ' miljoner kronor'); 
 }

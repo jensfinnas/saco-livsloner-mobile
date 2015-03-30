@@ -20,7 +20,6 @@
 	var showSlide = function ($slide) {
 		// Update graph after slide
 		var columns = $slide.attr('data-columns').split(",");
-		console.log(columns);
 		$('.profession').prop('checked', function() { 
 			var column = $(this).attr('value').split('|')[1];
 			return $.inArray(column, columns) > -1;
