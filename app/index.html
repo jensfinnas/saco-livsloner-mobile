@@ -20,6 +20,7 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
+    <!-- TEMPLATE: MOBILE NAVIGATION -->
     <script id="navigation-mobile" type="text/x-handlebars-template">
       <select class='form-control profession'>
       <option value="">Välj ett yrke</option>
@@ -32,6 +33,7 @@
         {{/each}}
       </select>
     </script>
+    <!-- TEMPLATE: DESKTOP NAVIGATION -->
     <script id="navigation-desktop" type="text/x-handlebars-template">
     {{#each .}}
     <div class="column">
@@ -56,6 +58,26 @@
       {{/each}}
     </div>
     {{/each}}
+    </script>
+    <!-- TEMPLATE: STORY SLIDER -->
+    <script id="story-points-template" type="text/x-handlebars-template">
+     <div id="story-carousel" class="carousel slide">
+       <div class="carousel-inner">
+          {{#each .}}
+          <div class="story-text item" data-columns="{{columns}}">
+            <h3>{{ title }}</h3>
+            <div class="content">{{{ content }}}</div>
+          </div>
+          {{/each}}
+        </div>
+        <a class="carousel-control left" href="#story-carousel" data-slide="prev">‹</a>  
+        <a class="carousel-control right" href="#story-carousel" data-slide="next">›</a> 
+        <ol class="carousel-indicators">
+          <li data-target="#story-carousel" data-slide-to="0" class="active"></li>
+          <li data-target="#story-carousel" data-slide-to="1"></li>
+          <li data-target="#story-carousel" data-slide-to="2"></li>
+        </ol> 
+      </div>
     </script>
 
     <h1>Tjänar du in din utbildning?</h1>
@@ -111,6 +133,7 @@
         <script src="scripts/main.js"></script>
         <script src="scripts/professions.js"></script>
         <script src="scripts/render.js"></script>
+        <script src="scripts/storyPoints.js"></script>
         <script src="scripts/utils.js"></script>
         <!-- endbuild -->
         <script type="text/javascript" src="//use.typekit.net/zxg8sjd.js"></script>

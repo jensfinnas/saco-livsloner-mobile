@@ -10,7 +10,7 @@ Livsloner = (function() {
 		self.chartContainer = self.container.append("div")
 			.attr('class', 'chart ' + (mobile ? 'mobile' : 'desktop'));
 
-		self.sentenceContainer = self.container.append("div")
+		self.sentenceContainer = self.chartContainer.append("div")
 			.attr('class', 'sentence');
 
 		var desktopMargins = {top: 10, right: 200, bottom: 30, left: 70};
@@ -25,6 +25,9 @@ Livsloner = (function() {
 		self.drawCanvas();
 		self.initChart();
 	}
+	/*	In mobile render a simple select dropdown where the user can pick a profession.
+		In desktop show the more advanced UI with possibility to pick multiple professions.
+	*/
 	Livsloner.prototype.drawNavigation = function() {
 		var self = this;
 		// Draw mobile ui
@@ -146,70 +149,90 @@ Livsloner = (function() {
 	};
 	Livsloner.prototype.updateLines = function(callbacks) {
 		var self = this;
-		var lineGroup = self.lineGroups.enter()
+
+		// Remove unselected professions
+		self.lineGroups.exit().transition()
+			.remove();
+
+		self.enteringLineGroups = self.lineGroups.enter()
 			.append('g')
 			.attr('class', function(d,i) {
 				return 'line-group ' + (i == 0 ? 'baseline' : 'profession-line')
 			});
 
-		var path = lineGroup.append("path")
+		var path = self.enteringLineGroups.append("path")
 			.datum(function(d) { return d.values })
 			.attr("class", "line")
 			.attr("d", self.line);
 
-		var hoverPath = lineGroup.append("path")
+		var hoverPath = self.enteringLineGroups.append("path")
 			.datum(function(d) { return d.values })
 			.attr("d", self.line)
 			.attr('stroke-width', 10)
 			.attr('stroke', '#fff')
 			.attr('opacity', 0.0001)
 			.attr('fill', 'none')
-			.on('mouseover', function() {
-				var hoveredLineGroup = this.parentElement;
+		
+		if (!self.mobile) {
+			self.enteringLineGroups.on('mouseover', function() {
+				var hoveredLineGroup = this;
 				self.lineGroups.classed('faded', function() {
-					return this !== hoveredLineGroup;
-				})
+					return this !== hoveredLineGroup && !d3.select(this).classed('baseline');
+				});
+				var baseline = self.chart.select('.line-group.baseline')[0][0];
+				self.breakEven = getBreakEvenPoint(baseline.__data__, hoveredLineGroup.__data__);
+				self.finalSalaries = getFinalSalaries(baseline.__data__, hoveredLineGroup.__data__);
+				self.addBreakEven();
+				self.addSentence();
 			})
 			.on('mouseout', function() {
 				self.lineGroups.classed('faded', false);
-			});
+				self.removeAnnotation();
+			});	
+		}
+		
 
 		// Animate entering lines
-		var animationDuration = 300;
+		if (self.mobile) {
+			var animationDuration = 300;
 
-		var totalLength;
-		path[0].forEach(function(node) {
-			if (node) {
-				totalLength = Math.max(node.getTotalLength(), totalLength);
-			}
-		});
-		var numberOfExistingLines = lineGroup[0].filter(function(d) {
-			return d === null;
-		}).length;
-		path.attr("stroke-dasharray", totalLength + " " + totalLength)
-			.attr("stroke-dashoffset", totalLength)
-			.transition()
-			.duration(animationDuration)
-			.delay(function(d,i) {
-				return (i - numberOfExistingLines) * animationDuration;
-			})
-			.ease("linear")
-			.attr("stroke-dashoffset", 0)
-			// Add break even after animation
-			.call(transitionEnd, function() { run(callbacks) });
+			var totalLength;
+			path[0].forEach(function(node) {
+				if (node) {
+					totalLength = Math.max(node.getTotalLength(), totalLength);
+				}
+			});
+			var numberOfExistingLines = self.enteringLineGroups[0].filter(function(d) {
+				return d === null;
+			}).length;
+			path.attr("stroke-dasharray", totalLength + " " + totalLength)
+				.attr("stroke-dashoffset", totalLength)
+				.transition()
+				.duration(animationDuration)
+				.delay(function(d,i) {
+					return (i - numberOfExistingLines) * animationDuration;
+				})
+				.ease("linear")
+				.attr("stroke-dashoffset", 0)
+				// Add break even after animation
+				.call(transitionEnd, function() { run(callbacks) });	
+		}
+		else {
+			run(callbacks);
+		}
+
 		
-		// Remove unselected professions
-		self.lineGroups.exit().transition()
-			.remove()
-			.call(transitionEnd, function() { run(callbacks) });
+		
 
 	};
 	
 
 	Livsloner.prototype.addBreakEven = function(args) {
 		var self;
-		if (args.self) {
-			self = args.self;
+		if (args) {
+			if (args.self) {
+				self = args.self;
+			}
 		}
 		else {
 			self = this;
@@ -241,19 +264,23 @@ Livsloner = (function() {
 
 	Livsloner.prototype.addSentence = function(args) {
 		var self;
-		if (args.self) {
-			self = args.self;
+		if (args) {
+			if (args.self) {
+				self = args.self;
+			}
 		}
 		else {
 			self = this;
 		};
 		var sentence = getSentence(self.breakEven, self.finalSalaries);
-		self.sentenceContainer.html(sentence);
+		self.sentenceContainer.html(sentence).classed('hidden', false);
 	}
 	Livsloner.prototype.annotateDifference = function(args) {
 		var self;
-		if (args.self) {
-			self = args.self;
+		if (args) {
+			if (args.self) {
+				self = args.self;
+			}
 		}
 		else {
 			self = this;
@@ -282,8 +309,10 @@ Livsloner = (function() {
 	};
 	Livsloner.prototype.annotateLines = function(args) {
 		var self;
-		if (args.self) {
-			self = args.self;
+		if (args) {
+			if (args.self) {
+				self = args.self;
+			}
 		}
 		else {
 			self = this;
@@ -324,33 +353,22 @@ Livsloner = (function() {
 
 	Livsloner.prototype.updateDesktopLabels = function(args) {
 		var self;
-		if (args.self) {
-			self = args.self;
+		if (args) {
+			if (args.self) {
+				self = args.self;
+			}
 		}
 		else {
 			self = this;
 		}
 
-		/*	We use a force layout to dynamically place labels and (almost) prevent overlap.
-
-		*/
-		var foci = [],
-          labels = [];
-
-        self.lineGroups.transition().each(function(d, i) {
-        	var x = self.width;
-        	var y = self.y(d.finalSalary);
-        	foci.push({x: x, y: y });
-        	labels.push({x: x, y: y, x0: x, y0: y, label: d.label})
-        });
-
-        var labelGroups = self.chart.selectAll('.label-group')
-          .data(labels, function(d) { return d.label; });
-
-        var newLabelGroups = labelGroups.enter().append('g')
+		var newLabelGroups = self.enteringLineGroups
+			.append('g')
 			.attr('class', 'label-group')
 			.attr('transform', function(d) {
-				return 'translate('+[d.x, d.y]+')'
+				var x = self.width;
+        		var y = self.y(d.finalSalary);
+				return 'translate('+[x, y]+')';
 			});
 
 		newLabelGroups.append('text')
@@ -358,53 +376,51 @@ Livsloner = (function() {
 				var str = addLineBreaks(d.label, 15);
 				addLineBreaksToSVG(str, this)					
 			})
-			.attr('transform', 'translate(19,0)');
+			.attr('transform', 'translate(19,5)');
 
 		newLabelGroups.append('line')
+			.attr('class', 'label-line')
 			.attr('x1', 4)
 			.attr('x2', 15)
 			.attr('y1', 0)
-			.attr('y2', 0)
-			.attr('stroke','#333')
+			.attr('y2', 0);
 
-		var force = d3.layout.force()
-		    .nodes(labels)
-		    .charge(-20)
-		    .gravity(0)
-		    .size([self.width, self.height]);
+		self.lineGroups.sort(function(a,b){
+    		return b.finalSalary - a.finalSalary;
+    	})
+    	var bottomYOfPreviousLabel = -99999;
+    	var prevHeight = 0;
+    	var prevY = -99999;
+		self.lineGroups.selectAll('.label-group').each(function(d) {
+			var elem = elem = d3.select(this);
+			var y0 = self.y(d.finalSalary);
+			var diff = y0 - prevY;
+			var offsetY;
+			if (diff>prevHeight) {
+			  offsetY = 0;
+			}
+			else {
+			  offsetY = prevHeight - diff + 3;
+			}
+			prevY = y0 + offsetY;
+			
+			elem.transition()
+				.duration(300)
+				.attr('transform', 'translate('+ [self.width, y0 + offsetY] +')');
 
-		force.on("tick", function(e) {
-		    var k = .1 * e.alpha;
-		    labels.forEach(function(o, j) {
-		        // The change in the position is proportional to the distance
-		        // between the label and the corresponding place (foci)
-		        o.y += (foci[j].y - o.y) * k;
-		        o.x += (foci[j].x - o.x) * k;
-		    });
-		    // Update the position of the text element
-		    self.chart.selectAll(".label-group")
-		    	.attr('transform', function(d) {
-		    		return 'translate('+[d.x, d.y]+')';
-		    	});
+			elem.select('line').transition()
+				.duration(300)
+				.attr('y1', -offsetY);
+			prevHeight = elem.select('text').node().getBoundingClientRect().height;
+			
 
-		    self.chart.selectAll(".label-group line")
-		    	.attr('y1', function(d) {
-		    		return d.y0 - d.y;
-		    	});
 		});
-		force.start();
-
-		labelGroups.exit().remove();
 	};
 
-	/*Livsloner.prototype.removeLines = function() {
-		var self = this;
-		self.lineGroups.exit().remove();
-	};*/
 	Livsloner.prototype.removeAnnotation = function() {
 		var self = this;
 		self.chart.selectAll('.annotation').remove();
-		self.sentenceContainer.html('');
+		self.sentenceContainer.html('').classed('hidden', true);
 	};
 
 	Livsloner.prototype.update = function() {
@@ -441,8 +457,8 @@ Livsloner = (function() {
 			})
 		}
 		if (lineData.length == 2) {
-			self.breakEven = getBreakEvenPoint(lineData);
-			self.finalSalaries = getFinalSalaries(lineData);
+			self.breakEven = getBreakEvenPoint(lineData[0], lineData[1]);
+			self.finalSalaries = getFinalSalaries(lineData[0], lineData[1]);
 
 			callbacks.push({ 
 				fn: self.addBreakEven,
@@ -540,13 +556,12 @@ Livsloner = (function() {
 		}
 	}
 
-	var getBreakEvenPoint = function(lineData) {
-		for (var i = 0; i < lineData[0].values.length; i++) {
-			var baselineValue = lineData[0].values[i].salary;
-			var salary = lineData[1].values[i].salary;
-
+	var getBreakEvenPoint = function(baseline, professionLine) {
+		for (var i = 0; i < baseline.values.length; i++) {
+			var baselineValue = baseline.values[i].salary;
+			var salary = professionLine.values[i].salary;
 			if (salary > baselineValue) {
-				return lineData[0].values[i];
+				return baseline.values[i];
 			}
 		}
 		// Salary projection never passes baseline
@@ -570,9 +585,9 @@ Livsloner = (function() {
 	}
 
 	// Get the final salaries of baseline and profession in compare mode
-	var getFinalSalaries = function(lineData) {
-		var baseline = lineData[0].finalSalary;
-		var profession = lineData[1].finalSalary;
+	var getFinalSalaries = function(baseline, professionLine) {
+		var baseline = baseline.finalSalary;
+		var profession = professionLine.finalSalary;
 		return {
 			baseline: baseline,
 			profession: profession,

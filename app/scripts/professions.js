@@ -106,7 +106,7 @@
 				nameShort: 'Sammanräknade',
 				cssClass: 'sort',
 				items: [
-					{ label: "Akademiker, totalt", column: 'Akademiker_totalt', baseline: 'GymnSamhNatv' }
+					{ label: "Akademiker, totalt", column: 'Akademiker_totalt', baseline: 'GymnTotal' }
 				]
 			}
 		],
