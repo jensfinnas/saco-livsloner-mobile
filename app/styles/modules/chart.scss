@@ -43,7 +43,7 @@
     vector-effect: non-scaling-stroke;
 }
 .profession-line {
-  line {
+  .line {
     stroke: $theme-color;
     stroke-width: 2px;
   }
@@ -52,21 +52,20 @@
   }
 }
 
-$baseline-color: $color-dark-grey;
 .baseline {
-  line {
+  .line {
     fill: none;
-    stroke: $baseline-color;
+    stroke: $color-dark-grey;
     stroke-width: 1px;
     z-index: 999;
   }
   .color-key {
-    fill: $baseline-color;
+    fill: $color-dark-grey;
   }
 }
 @media screen and (min-width: $break-point) {
   .baseline {
-    line, path {
+    .line, line {
       stroke: $theme-color;
       stroke-width: 2px;
     }
@@ -78,8 +77,8 @@ $baseline-color: $color-dark-grey;
     }
   }
   .profession-line {
-    line, path {
-      stroke: $baseline-color;
+    .line, line {
+      stroke: $color-dark-grey;
       stroke-width: 1px;
     }
   }

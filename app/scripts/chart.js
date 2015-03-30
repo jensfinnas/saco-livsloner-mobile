@@ -10,9 +10,6 @@ Livsloner = (function() {
 		self.chartContainer = self.container.append("div")
 			.attr('class', 'chart ' + (mobile ? 'mobile' : 'desktop'));
 
-		self.sentenceContainer = self.chartContainer.append("div")
-			.attr('class', 'sentence');
-
 		var desktopMargins = {top: 10, right: 200, bottom: 30, left: 70};
 		var mobileMargins = {top: 10, right: 40, bottom: 30, left: 27};
 
@@ -23,6 +20,9 @@ Livsloner = (function() {
 
 		self.drawNavigation();
 		self.drawCanvas();
+		self.sentenceContainer = self.chartContainer.append("div")
+			.attr('class', 'sentence');
+			
 		self.initChart();
 	}
 	/*	In mobile render a simple select dropdown where the user can pick a profession.
@@ -340,7 +340,7 @@ Livsloner = (function() {
 				return 'translate('+[x,y]+')';
 			});
 		g.append("text").each(function (d) {
-			var label = addLineBreaks(d.label, 15);
+			var str = addLineBreaks(d.label, 15);
 			addLineBreaksToSVG(str, this);
 		});
 

@@ -118,10 +118,16 @@
       ga('create','UA-XXXXX-X');ga('send','pageview');
     </script>
     <script>
+    function getUrlParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
     // App settings
     var app = {};
     app.selector = '#chart';
-    app.mobile = false;
+    app.mobile = getUrlParameterByName('version') == 'mobile';
     app.dataPath = 'data/data2015.tsv';
     </script>
 
@@ -130,7 +136,6 @@
         <script src="scripts/formats.js"></script>
         <script src="scripts/handlebarsHelpers.js"></script>
         <script src="scripts/init.js"></script>
-        <script src="scripts/main.js"></script>
         <script src="scripts/professions.js"></script>
         <script src="scripts/render.js"></script>
         <script src="scripts/storyPoints.js"></script>
