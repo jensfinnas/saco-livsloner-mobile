@@ -27,6 +27,11 @@ Livsloner = (function() {
 		self.drawCanvas();
 		self.sentenceContainer = self.chartContainer.append("div")
 			.attr('class', 'sentence');
+
+		self.sentenceContainer.append('div')
+			.attr('class', 'header');
+		self.sentenceContainer.append('div')
+			.attr('class', 'body');
 			
 		self.initChart();
 	}
@@ -159,6 +164,14 @@ Livsloner = (function() {
 		      .style("text-anchor", "end")
 			  .attr("class", "caption")
 		      .text("Livslön efter skatt (Mkr)");
+
+		if (!self.mobile) {
+			$(".y.axis .caption").tooltip({
+				'container': 'body',
+				'placement': 'right',
+				'title' : 'I begreppet livslön inräknas både lön och pension efter skatt, studiemedel räknas som inkomst under studietiden. Den årliga avbetalningen av studieskulden dras bort från lönen under återbetalningstiden. Hänsyn tas till att risken för arbetslöshet varierar mellan olika akademikergrupper och gymnasieutbildade. Alla beräkningar är gjorda utifrån 2009 års siffror.'
+			});
+		}
 
 	};
 	Livsloner.prototype.drawBaseline = function() {
@@ -345,7 +358,9 @@ Livsloner = (function() {
 
 		var baselineLabel = self.chart.select('.baseline.line-group')[0][0].__data__.label.toLowerCase();
 		var sentence = getSentence(self.breakEven, self.finalSalaries, baselineLabel);
-		self.sentenceContainer.html(sentence).classed('hidden', false);
+		self.sentenceContainer.classed('hidden', false);
+		self.sentenceContainer.select('.header').html(self.finalSalaries.professionLabel);
+		self.sentenceContainer.select('.body').html(sentence);
 	}
 	/*	If only one profession is selected in desktop we want to show
 		the background areas highlighting the difference.
@@ -516,7 +531,8 @@ Livsloner = (function() {
 		var self = this;
 		self.chart.selectAll('.annotation').remove();
 		self.chart.selectAll('.profession-line').classed('highlighted', false);
-		self.sentenceContainer.html('').classed('hidden', true);
+		self.sentenceContainer.classed('hidden', true);
+		self.sentenceContainer.selectAll('.body, .header').html('');
 	};
 
 	Livsloner.prototype.update = function() {
@@ -683,19 +699,20 @@ Livsloner = (function() {
 			.replace('social omsorg', 'utbildad inom social omsorg')
 			.replace('organisation, administration & förvaltning', 'utbildad inom organisation, administration och förvaltning');
 		var isBaseline = finalSalaries.baseline == finalSalaries.profession;
+		var differencePercent = formatPercentInSentence( Math.abs(1 - finalSalaries.profession / finalSalaries.baseline ) );
 		if (isBaseline) {
-			str += 'En ' +baselineLabel+' person utan högre utbildning får i snitt en livslön på ' + formatInSentence(finalSalaries.profession) + '.';
+			str += 'En ' +baselineLabel+' person utan högre utbildning får i snitt en livslön på <strong>' + formatInSentence(finalSalaries.profession) + '</strong>.';
 		}
 		else {
 			if (breakEven) {
-				str = 'Vid ' + breakEven.age + ' år har du som ' + professionLabel + ' tjänat lika mycket som en ' + baselineLabel + '.';
+				str = 'Vid <strong>' + breakEven.age + ' års ålder</strong> har en ' + professionLabel + ' tjänat in sin utbildning.';
 				comparator = 'mer';
 			}
 			else {
-				str += 'Som ' + professionLabel + ' kommer aldrig i kapp en ' + baselineLabel + ' i livslön.';
+				str += 'En ' + professionLabel + ' tjänar aldrig in sin utbildning.';
 				comparator = 'mindre';
 			}
-			str +=  ' Din livslön är ' + formatInSentence(finalSalaries.profession) + ', ' + formatInSentence(Math.abs(finalSalaries.difference)) + ' ' + comparator + ' än den gymnasieutbildades.';
+			str += ' Livslönen för en ' + professionLabel + ' är <strong>' + formatInSentence(finalSalaries.profession) + ' kronor</strong>, vilket är cirka <strong>'+ differencePercent +' ' + comparator + ' </strong> än genomsnittet för en ' + baselineLabel + '.';
 		}
 		
 		return str;

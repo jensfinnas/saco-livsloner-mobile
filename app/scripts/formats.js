@@ -22,3 +22,10 @@ var formatInSentence = function(d) {
 		.replace('k', '&nbsp;000 kronor')
 		.replace('M', '&nbsp;miljoner kronor'); 
 }
+var formatPercent = function(d) {
+  return locale.numberFormat(".1%")(d);
+}
+var formatPercentInSentence = function(d) {
+  return locale.numberFormat(".1%")(d)
+    .replace('%', ' procent');
+}

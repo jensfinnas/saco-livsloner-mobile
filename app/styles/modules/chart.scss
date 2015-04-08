@@ -146,18 +146,27 @@
 }
 
 .sentence {
-  padding: 10px;
-  background: #f1f1f1;
   border-radius: 6px;
   display: block;
+  border: 1px solid #f1f1f1;
+  background-color: #fff;
+  .header {
+    background-color: $theme-color;
+      padding: 4px 10px;
+      color: #fff;
+      font-weight: bold;
+  }
+  .body {
+    padding: 10px;
+  }
 }
 @media screen and (min-width: $break-point) {
   .sentence {
-    font-size: 13px;
+    font-size: 12px;
     position: absolute;
-    width: 250px;
-    left: 141px;
-    top: 47px;
+    width: 280px;
+    left: 122px;
+    top: 7px;
   }
 }
 
@@ -185,4 +194,13 @@
   }
 }
 
+// TOOLTOP
+.tooltip {
+  margin-left: -125px !important;
+  margin-top: 75px !important;
+  .tooltip-inner {
+    text-align: left;
+    padding: 5px 12px;
+  }
+}
 
