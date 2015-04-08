@@ -1,4 +1,4 @@
-<!DOCTYPE html> <html class=no-js> <head> <meta charset=utf-8> <title>Saco livslöner</title> <meta name=description content=""> <meta name=viewport content="width=device-width"> <link rel="shortcut icon" href=/6df2b309.favicon.ico> <!-- Place favicon.ico and apple-touch-icon.png in the root directory --> <link rel=stylesheet href=styles/b2e56b3c.main.css>  <body> <!--[if lt IE 9]>
+<!DOCTYPE html> <html class=no-js> <head> <meta charset=utf-8> <title>Saco livslöner</title> <meta name=description content=""> <meta name=viewport content="width=device-width"> <link rel="shortcut icon" href=/6df2b309.favicon.ico> <!-- Place favicon.ico and apple-touch-icon.png in the root directory --> <link rel=stylesheet href=styles/30725fba.main.css>  <body> <!--[if lt IE 9]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]--> <!-- TEMPLATE: MOBILE NAVIGATION --> <script id=navigation-mobile type=text/x-handlebars-template><select class='form-control profession'>
       <option value="">Välj ett yrke</option>
@@ -11,6 +11,16 @@
         {{/each}}
       </select></script> <!-- TEMPLATE: DESKTOP NAVIGATION --> <script id=navigation-desktop type=text/x-handlebars-template>{{#each .}}
     <div class="column">
+      {{#if @first}}
+      <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <span class="glyphicon glyphicon-remove pull-right"></span>
+                Rensa val
+            </h4>
+          </div>
+      </div>
+      {{/if}}
       {{#each .}}
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -47,19 +57,23 @@
           <li data-target="#story-carousel" data-slide-to="1"></li>
           <li data-target="#story-carousel" data-slide-to="2"></li>
         </ol> 
-      </div></script> <h1>Tjänar du in din utbildning?</h1> <p class=lead> Välj ett yrke för att se när eller om du tjänar "ikapp" en person som börjar jobba direkt efter gymnasiet. </p> <div id=chart class=no-selection> </div> <script src=scripts/98f59e33.vendor.js></script> <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. --> <script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+      </div></script> <div class=container-fluid> <div class=intro> <h1>Tjänar du in din utbildning?</h1> <p class=lead> Välj ett yrke för att se när eller om du tjänar "i kapp" en person som börjar jobba direkt efter gymnasiet. </p> </div> <div id=chart class=no-selection> </div> </div> <script src=scripts/98f59e33.vendor.js></script> <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. --> <script>/*(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
       function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
       e=o.createElement(i);r=o.getElementsByTagName(i)[0];
       e.src='//www.google-analytics.com/analytics.js';
       r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-      ga('create','UA-XXXXX-X');ga('send','pageview');</script> <script>function getUrlParameterByName(name) {
+      ga('create','UA-XXXXX-X');ga('send','pageview');*/</script> <script>function getUrlParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
             results = regex.exec(location.search);
         return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
+    // The breakpoint in px when to load the mobile version
+    var breakpoint = 650;
+
     // App settings
     var app = {};
     app.selector = '#chart';
-    app.mobile = getUrlParameterByName('version') == 'mobile';
-    app.dataPath = 'data/data2015.tsv';</script> <script src=scripts/1a742f32.main.js></script> <script type=text/javascript src=//use.typekit.net/zxg8sjd.js></script> <script type=text/javascript>try { Typekit.load(); } catch (e) { console.log(e); }</script> <script type=text/javascript>app.init();</script>  
+    //app.mobile = getUrlParameterByName('version') == 'mobile';
+    app.mobile = $('body').width() < breakpoint;
+    app.dataPath = 'data/data2015.tsv';</script> <script src=scripts/e2d2b0ee.main.js></script> <script type=text/javascript src=//use.typekit.net/zxg8sjd.js></script> <script type=text/javascript>try { Typekit.load(); } catch (e) { console.log(e); }</script> <script type=text/javascript>app.init();</script>  
