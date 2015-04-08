@@ -215,10 +215,14 @@ Livsloner = (function() {
 			})
 			.on('mouseout', function() {
 				self.lineGroups
-					.classed('faded', false)
-					.classed('highlighted', false);
-
-				self.removeAnnotation();
+					.classed('faded', false);
+				
+				/*	Don't remove annotation if only one line is selected 
+				*/
+				if (self.lineGroups[0].length !== 2) {
+					self.lineGroups.classed('highlighted', false);
+					self.removeAnnotation();
+				}
 			});	
 		}
 		
@@ -343,6 +347,23 @@ Livsloner = (function() {
 		var sentence = getSentence(self.breakEven, self.finalSalaries, baselineLabel);
 		self.sentenceContainer.html(sentence).classed('hidden', false);
 	}
+	/*	If only one profession is selected in desktop we want to show
+		the background areas highlighting the difference.
+	*/
+	Livsloner.prototype.highlightSelectedProfession = function(args) {
+		var self;
+		if (args) {
+			if (args.self) {
+				self = args.self;
+			}
+		}
+		else {
+			self = this;
+		}
+		self.chart.selectAll('.profession-line').classed('highlighted', true);
+	}
+
+
 	Livsloner.prototype.annotateDifference = function(args) {
 		var self;
 		if (args) {
@@ -494,6 +515,7 @@ Livsloner = (function() {
 	Livsloner.prototype.removeAnnotation = function() {
 		var self = this;
 		self.chart.selectAll('.annotation').remove();
+		self.chart.selectAll('.profession-line').classed('highlighted', false);
 		self.sentenceContainer.html('').classed('hidden', true);
 	};
 
@@ -557,6 +579,12 @@ Livsloner = (function() {
 					fn: self.annotateLines,
 					args: { self: self }
 				});	
+			}
+			else {
+				callbacks.push({
+					fn: self.highlightSelectedProfession,
+					args: { self: self }
+				})
 			}
 			
 
@@ -650,7 +678,10 @@ Livsloner = (function() {
 		var str = '';
 		var comparator;
 		var baselineLabel = finalSalaries.baselineLabel.toLowerCase();
-		var professionLabel = finalSalaries.professionLabel.toLowerCase();
+		var professionLabel = finalSalaries.professionLabel.toLowerCase()
+			.replace('akademiker, totalt', 'genomsnittlig akademiker')
+			.replace('social omsorg', 'utbildad inom social omsorg')
+			.replace('organisation, administration & förvaltning', 'utbildad inom organisation, administration och förvaltning');
 		var isBaseline = finalSalaries.baseline == finalSalaries.profession;
 		if (isBaseline) {
 			str += 'En ' +baselineLabel+' person utan högre utbildning får i snitt en livslön på ' + formatInSentence(finalSalaries.profession) + '.';
