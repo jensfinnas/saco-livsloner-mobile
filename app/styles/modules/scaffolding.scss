@@ -1,9 +1,14 @@
-body {
-	padding: 10px;
+body.mobile {
+	.intro {
+		display: block;
+	}
 }
-
+body.desktop {
+	.intro {
+		display: none;
+	}
+}
 @media screen and (min-width: $break-point) {
 	body {
-		padding: 0;
 	}
 }

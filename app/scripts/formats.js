@@ -13,12 +13,12 @@ var locale = d3.locale({
   "shortMonths": ["jan", "feb", "mars", "apr", "maj", "jun", "jul", "aug", "sept", "okt", "nov", "dec"]
 })
 var formatMillionSEK = function(d) {
-	return d3.format(".2s")(d)
+	return locale.numberFormat(".2s")(d)
 		.replace('k', ' tKr')
 		.replace('M', ' Mkr'); 
 }
 var formatInSentence = function(d) {
-	return d3.format(".3s")(d)
+	return locale.numberFormat(".3s")(d)
 		.replace('k', '&nbsp;000 kronor')
-		.replace('M', ' miljoner kronor'); 
+		.replace('M', '&nbsp;miljoner kronor'); 
 }

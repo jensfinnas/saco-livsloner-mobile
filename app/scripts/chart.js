@@ -1,3 +1,8 @@
+/*	Livsloner is a linechart, including UI, for displaying life time salaries
+	for employees with an academic education.
+	Livsloner can be rendered in a striped down mobile version or a wider desktop
+	version with option to select multiple professions. 
+*/
 Livsloner = (function() {
 	function Livsloner(selector, mobile, data, groups) {
 		var self = this;
@@ -15,7 +20,7 @@ Livsloner = (function() {
 
 		self.margin = m = mobile ? mobileMargins : desktopMargins;
 		self.width = (containerWidth - m.left - m.right);
-		var _height = mobile ? 270 : 400;
+		var _height = mobile ? 270 : 320;
 		self.height = _height - m.top - m.bottom;
 
 		self.drawNavigation();
@@ -89,6 +94,7 @@ Livsloner = (function() {
 
 		self.xAxis = d3.svg.axis()
 		    .scale(self.x)
+		    .ticks(self.mobile ? 5 : 10)
 		    .orient("bottom");
 
 		self.yAxis = d3.svg.axis()
@@ -102,15 +108,26 @@ Livsloner = (function() {
           .x(function(d){ return self.x(d.age) })
           .y(function(d){ return self.y(d.salary) });
 
-        /*self.areaAboveBaseline = d3.svg.area()
-            .x(function(d) { return x(d.age); })
-            .y0(0)
-            .y1(function(d) { return y(d.baseline); });
 
-        self.areaBelowBaseline = d3.svg.area()
-            .x(function(d) { return x(d.age); })
-            .y0(function(d) { return y(self.height); })
-            .y1(function(d) { return y(d.baseline); });*/
+        self.areaAbove = d3.svg.area()
+            .interpolate("basis")
+            .x(self.line.x())
+            .y0(function(d) {
+            	return self.y(d.baseline); 
+            })
+            .y1(function(d) { 
+            	return self.y(Math.max(d.baseline, d.salary)); 
+            });
+
+        self.areaBelow = d3.svg.area()
+            .interpolate("basis")
+            .x(self.line.x())
+            .y0(function(d) {
+            	return self.y(d.baseline); 
+            })
+            .y1(function(d) { 
+            	return self.y(Math.min(d.baseline, d.salary)); 
+            });
 
         self.overlay = self.svg.append('rect')
         	.attr('class', 'overlay')
@@ -160,38 +177,53 @@ Livsloner = (function() {
 				return 'line-group ' + (i == 0 ? 'baseline' : 'profession-line')
 			});
 
-		var path = self.enteringLineGroups.append("path")
-			.datum(function(d) { return d.values })
+		var pathGroup = self.enteringLineGroups.append("g")
+			.attr('class', 'path-group')
+			.datum(function(d) { return d.values });
+
+		pathGroup.append("path")
 			.attr("class", "line")
 			.attr("d", self.line);
 
-		var hoverPath = self.enteringLineGroups.append("path")
-			.datum(function(d) { return d.values })
-			.attr("d", self.line)
-			.attr('stroke-width', 10)
-			.attr('stroke', '#fff')
-			.attr('opacity', 0.0001)
-			.attr('fill', 'none')
+		pathGroup.append("path")
+			.attr("class", "area above");
+		
+		pathGroup.append("path")
+			.attr("class", "area below");
+
 		
 		if (!self.mobile) {
+			// On mouse over
 			self.enteringLineGroups.on('mouseover', function() {
 				var hoveredLineGroup = this;
+
+				self.updateBackgroundArea({ self: self });
+
+				d3.select(this).classed('highlighted', true);
+				
+				// Fade out other lines
 				self.lineGroups.classed('faded', function() {
 					return this !== hoveredLineGroup && !d3.select(this).classed('baseline');
 				});
 				var baseline = self.chart.select('.line-group.baseline')[0][0];
+				
+				// Show break even
 				self.breakEven = getBreakEvenPoint(baseline.__data__, hoveredLineGroup.__data__);
 				self.finalSalaries = getFinalSalaries(baseline.__data__, hoveredLineGroup.__data__);
 				self.addBreakEven();
 				self.addSentence();
 			})
 			.on('mouseout', function() {
-				self.lineGroups.classed('faded', false);
+				self.lineGroups
+					.classed('faded', false)
+					.classed('highlighted', false);
+
 				self.removeAnnotation();
 			});	
 		}
 		
-
+		run(callbacks);
+		/*
 		// Animate entering lines
 		if (self.mobile) {
 			var animationDuration = 300;
@@ -219,13 +251,47 @@ Livsloner = (function() {
 		}
 		else {
 			run(callbacks);
-		}
+		}*/
 
 		
 		
 
 	};
-	
+	/*	The background areas needs to be updated with every new selection as
+		baseline can change.
+	*/
+	Livsloner.prototype.updateBackgroundArea = function(args) {
+		var self;
+		if (args) {
+			if (args.self) {
+				self = args.self;
+			}
+		}
+		var baselineValues = self.chart.select('.baseline')[0][0].__data__.values;
+		var _addBaseLineData = function(values) {
+			return values.map(function(d,i) {
+				d.baseline = baselineValues[i].salary;
+				return d;
+			})
+		}
+
+		var pathGroups = self.chart.selectAll('.path-group')
+			.datum(function(d) { 
+				return _addBaseLineData(d); 
+			});
+
+		pathGroups.selectAll(".area.above")
+			.attr("d", self.areaAbove);
+		
+		pathGroups.selectAll(".area.below")
+			.attr("d", self.areaBelow);
+
+		var baselineFinalSalary = baselineValues[baselineValues.length - 1].salary;
+		self.chart.selectAll('.line-group').sort(function(a,b) {
+			return Math.abs(baselineFinalSalary - b.finalSalary) - Math.abs(baselineFinalSalary - a.finalSalary);
+		})
+
+	}
 
 	Livsloner.prototype.addBreakEven = function(args) {
 		var self;
@@ -305,10 +371,12 @@ Livsloner = (function() {
 				.attr('dy', '.75em')
 				.attr('y', 5)
 				.attr('transform', 'rotate(-90)')
-				.text((self.finalSalaries.difference > 0 ? '+' : '') + formatMillionSEK(self.finalSalaries.difference));
+				.text('Skillnad: ' + (self.finalSalaries.difference > 0 ? '+' : '') + formatMillionSEK(self.finalSalaries.difference));
 		}
 
 	};
+	/*	This is only used in mobile
+	*/
 	Livsloner.prototype.annotateLines = function(args) {
 		var self;
 		if (args) {
@@ -353,6 +421,8 @@ Livsloner = (function() {
 			.attr('height', colorKeySize);
 	}
 
+	/*
+	*/
 	Livsloner.prototype.updateDesktopLabels = function(args) {
 		var self;
 		if (args) {
@@ -419,6 +489,8 @@ Livsloner = (function() {
 		});
 	};
 
+	/*	Cleared everything classed annotation.
+	*/
 	Livsloner.prototype.removeAnnotation = function() {
 		var self = this;
 		self.chart.selectAll('.annotation').remove();
@@ -462,7 +534,11 @@ Livsloner = (function() {
 			self.breakEven = getBreakEvenPoint(lineData[0], lineData[1]);
 			self.finalSalaries = getFinalSalaries(lineData[0], lineData[1]);
 
-			callbacks.push({ 
+			callbacks.push({
+				fn: self.updateBackgroundArea,
+				args: { self: self }
+			},
+			{ 
 				fn: self.addBreakEven,
 				args: { self: self }
 			}, 
@@ -500,7 +576,7 @@ Livsloner = (function() {
 
 
 	};
-	// Util functions
+	// UTIILITY FUNCTIONS
 	var getSelectedProfessions = function() {
 		var selectedProfessions = [];
 		if (app.mobile) {
@@ -570,20 +646,22 @@ Livsloner = (function() {
 		return false;
 	}
 
-	var getSentence = function(breakEven, finalSalaries,baselineLabel) {
+	var getSentence = function(breakEven, finalSalaries) {
 		var str = '';
 		var comparator;
+		var baselineLabel = finalSalaries.baselineLabel.toLowerCase();
+		var professionLabel = finalSalaries.professionLabel.toLowerCase();
 		var isBaseline = finalSalaries.baseline == finalSalaries.profession;
 		if (isBaseline) {
-			str += 'En '+baselineLabel+'s livslön landar på ' + formatInSentence(finalSalaries.profession) + '.';
+			str += 'En ' +baselineLabel+' person utan högre utbildning får i snitt en livslön på ' + formatInSentence(finalSalaries.profession) + '.';
 		}
 		else {
 			if (breakEven) {
-				str = 'Vid ' + breakEven.age + ' år har du tjänat lika mycket som en ' + baselineLabel + '.';
+				str = 'Vid ' + breakEven.age + ' år har du som ' + professionLabel + ' tjänat lika mycket som en ' + baselineLabel + '.';
 				comparator = 'mer';
 			}
 			else {
-				str += 'Du kommer aldrig i kapp en ' + baselineLabel + ' i livslön.';
+				str += 'Som ' + professionLabel + ' kommer aldrig i kapp en ' + baselineLabel + ' i livslön.';
 				comparator = 'mindre';
 			}
 			str +=  ' Din livslön är ' + formatInSentence(finalSalaries.profession) + ', ' + formatInSentence(Math.abs(finalSalaries.difference)) + ' ' + comparator + ' än den gymnasieutbildades.';
@@ -595,12 +673,12 @@ Livsloner = (function() {
 
 	// Get the final salaries of baseline and profession in compare mode
 	var getFinalSalaries = function(baseline, professionLine) {
-		var baseline = baseline.finalSalary;
-		var profession = professionLine.finalSalary;
 		return {
-			baseline: baseline,
-			profession: profession,
-			difference: profession - baseline
+			baseline: baseline.finalSalary,
+			baselineLabel: baseline.label,
+			profession: professionLine.finalSalary,
+			professionLabel: professionLine.label,
+			difference: professionLine.finalSalary - baseline.finalSalary
 		}
 	}
 	// Invoke callback when all d3 animations are done

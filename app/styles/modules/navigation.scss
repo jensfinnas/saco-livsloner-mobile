@@ -12,15 +12,34 @@
 		border-radius: 6px;
 		box-shadow: 0;
 		border: 0;
+		margin-bottom: 6px;
+
 		
 		.panel-heading {
+			
 			background-color: $saco-orange;
 			border: 0;
 			cursor: pointer;
+			padding: 7px 10px;
+
+			.panel-title {
+				font-size: 12px;
+				.glyphicon {
+					font-size: 8px;
+				}
+			}
+			
 		}
-		label {
-			font-weight: 300;
-			display: block;
+		.panel-body {
+			padding: 4px 10px;
+			font-size: 12px;
+			
+			label {
+				font-weight: 300;
+				display: block;
+				margin-bottom: 2px;
+			}	
 		}
+		
 	}
 }

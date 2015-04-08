@@ -1,7 +1,8 @@
 $(app).on('app:dataReady', function (ev) {
 	var _groups = app.mobile ? app.professions : app.professionColumns;
 	
-	
+	// For styling
+	$('body').addClass(app.mobile ? 'mobile' : 'desktop')
 
 	// Render chart
 	app.chart = new Livsloner(

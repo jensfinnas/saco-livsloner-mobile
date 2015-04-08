@@ -37,6 +37,16 @@
     <script id="navigation-desktop" type="text/x-handlebars-template">
     {{#each .}}
     <div class="column">
+      {{#if @first}}
+      <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <span class="glyphicon glyphicon-remove pull-right"></span>
+                Rensa val
+            </h4>
+          </div>
+      </div>
+      {{/if}}
       {{#each .}}
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -79,12 +89,15 @@
         </ol> 
       </div>
     </script>
-
-    <h1>Tjänar du in din utbildning?</h1>
-    <p class="lead">
-      Välj ett yrke för att se när eller om du tjänar "ikapp" en person som börjar jobba direkt efter gymnasiet.
-    </p>
-    <div id="chart" class="no-selection">
+    <div class="container-fluid">
+      <div class="intro">
+        <h1>Tjänar du in din utbildning?</h1>
+        <p class="lead">
+          Välj ett yrke för att se när eller om du tjänar "i kapp" en person som börjar jobba direkt efter gymnasiet.
+        </p>
+      </div>
+      <div id="chart" class="no-selection">
+      </div>
     </div>
 
 
@@ -110,12 +123,12 @@
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
     <script>
-      (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+      /*(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
       function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
       e=o.createElement(i);r=o.getElementsByTagName(i)[0];
       e.src='//www.google-analytics.com/analytics.js';
       r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-      ga('create','UA-XXXXX-X');ga('send','pageview');
+      ga('create','UA-XXXXX-X');ga('send','pageview');*/
     </script>
     <script>
     function getUrlParameterByName(name) {
@@ -124,10 +137,14 @@
             results = regex.exec(location.search);
         return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
+    // The breakpoint in px when to load the mobile version
+    var breakpoint = 650;
+
     // App settings
     var app = {};
     app.selector = '#chart';
-    app.mobile = getUrlParameterByName('version') == 'mobile';
+    //app.mobile = getUrlParameterByName('version') == 'mobile';
+    app.mobile = $('body').width() < breakpoint;
     app.dataPath = 'data/data2015.tsv';
     </script>
 
@@ -135,7 +152,7 @@
         <script src="scripts/chart.js"></script>
         <script src="scripts/formats.js"></script>
         <script src="scripts/handlebarsHelpers.js"></script>
-        <script src="scripts/init.js"></script>
+        <script src="scripts/initData.js"></script>
         <script src="scripts/professions.js"></script>
         <script src="scripts/render.js"></script>
         <script src="scripts/storyPoints.js"></script>
