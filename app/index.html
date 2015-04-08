@@ -59,7 +59,7 @@
             <div class="panel-body">
               {{#each items}}
               <label>
-                <input type="checkbox" value="{{ label }}|{{ column }}|{{baseline}}" class="profession"/> {{ label }}
+                <input type="checkbox" value="{{ label }}|{{ column }}|{{baseline}}" class="profession"/> <span class="label-text">{{ label }}</span>
               </label>
               {{/each}}
             </div>
@@ -91,9 +91,9 @@
     </script>
     <div class="container-fluid">
       <div class="intro">
-        <h1>Tjänar du in din utbildning?</h1>
         <p class="lead">
-          Välj ett yrke för att se när eller om du tjänar "i kapp" en person som börjar jobba direkt efter gymnasiet.
+          Lönen är så mycket mer än vad som syns i lönekuvertet i slutet av månaden. Hela livets inkomster räknas, inte minst för dig som är akademiker med obetalda studieår i bagaget.<br/>
+          Utbildning ska löna sig. Därför måste det finnas möjlighet till löneutveckling.
         </p>
       </div>
       <div id="chart" class="no-selection">
